@@ -1,5 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+
+import '../exception/meta_exception.dart';
+import '../repositories/meta_response.dart';
+import 'network_logger.dart';
 
 abstract class HttpClient<T> {
   Future<T> get(Uri url, Map<String, String>? headers);
@@ -19,6 +26,8 @@ abstract class HttpClient<T> {
     required Map<String, File> files,
     Map<String, String>? fields,
   });
+  Future<Uint8List> getBytesArrayFromUrl(String url);
+  Future<String> downloadAndSaveFile(String url, String fileName);
 }
 
 class CoinsleekHttpClient implements HttpClient {
@@ -34,7 +43,18 @@ class CoinsleekHttpClient implements HttpClient {
   ) async {
     try {
       final response = await _client.delete(url, headers: headers, body: body);
+
+      appNetworkLogger(
+        endpoint: url.toString(),
+        payload: headers.toString(),
+        response: response.toString(),
+      );
+
       return response;
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } on TimeoutException {
+      throw Exception('Request timed out');
     } catch (exception) {
       throw Exception(exception);
     }
@@ -44,7 +64,29 @@ class CoinsleekHttpClient implements HttpClient {
   Future<http.Response> get(Uri url, Map<String, String>? headers) async {
     try {
       final response = await _client.get(url, headers: headers);
+
+      appNetworkLogger(
+        endpoint: url.toString(),
+        payload: headers.toString(),
+        response: response.toString(),
+      );
+
+      MetaResponse metaResponse = MetaResponse.fromJson(
+        jsonDecode(response.body),
+      );
+
+      if (metaResponse.error != false && response.statusCode != 200) {
+        MetaExceptionHandler(
+          response.statusCode,
+          jsonDecode(response.body),
+        ).handleByErrorCode();
+      }
+
       return response;
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } on TimeoutException {
+      throw Exception('Request timed out');
     } catch (exception) {
       throw Exception(exception);
     }
@@ -58,7 +100,29 @@ class CoinsleekHttpClient implements HttpClient {
   ) async {
     try {
       final response = await _client.post(url, headers: headers, body: body);
+
+      appNetworkLogger(
+        endpoint: url.toString(),
+        payload: headers.toString(),
+        response: response.body.toString(),
+      );
+
+      MetaResponse metaResponse = MetaResponse.fromJson(
+        jsonDecode(response.body),
+      );
+
+      if (metaResponse.error != false) {
+        MetaExceptionHandler(
+          response.statusCode,
+          jsonDecode(response.body),
+        ).handleByErrorCode();
+      }
+
       return response;
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } on TimeoutException {
+      throw Exception('Request timed out');
     } catch (exception) {
       throw Exception(exception);
     }
@@ -72,7 +136,18 @@ class CoinsleekHttpClient implements HttpClient {
   ) async {
     try {
       final response = await _client.put(url, headers: headers, body: body);
+
+      appNetworkLogger(
+        endpoint: url.toString(),
+        payload: headers.toString(),
+        response: response.toString(),
+      );
+
       return response;
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } on TimeoutException {
+      throw Exception('Request timed out');
     } catch (exception) {
       throw Exception(exception);
     }
@@ -86,7 +161,18 @@ class CoinsleekHttpClient implements HttpClient {
   ) async {
     try {
       final response = await _client.patch(url, headers: headers, body: body);
+
+      appNetworkLogger(
+        endpoint: url.toString(),
+        payload: headers.toString(),
+        response: response.toString(),
+      );
+
       return response;
+    } on SocketException {
+      throw Exception('No Internet connection');
+    } on TimeoutException {
+      throw Exception('Request timed out');
     } catch (exception) {
       throw Exception(exception);
     }
@@ -134,6 +220,18 @@ class CoinsleekHttpClient implements HttpClient {
       );
     });
     return request.send();
+  }
+
+  @override
+  Future<Uint8List> getBytesArrayFromUrl(String url) async {
+    final response = await http.get(Uri.parse(url));
+    return response.bodyBytes;
+  }
+
+  @override
+  Future<String> downloadAndSaveFile(String url, String fileName) async {
+    final bytes = await getBytesArrayFromUrl(url);
+    return base64Encode(bytes);
   }
 
   factory CoinsleekHttpClient.create() {
