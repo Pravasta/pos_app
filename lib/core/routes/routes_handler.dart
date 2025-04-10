@@ -1,4 +1,4 @@
-import 'package:architecture_project/main.dart';
+import 'package:pos_app/main.dart';
 import 'package:flutter/material.dart';
 
 import 'routes_name.dart';

@@ -1,11 +1,8 @@
-import 'package:architecture_project/core/injection/env.dart';
-import 'package:architecture_project/main.dart';
+import 'package:pos_app/core/injection/env.dart';
+import 'package:pos_app/main.dart';
 
 class Injection {
-  static const String fontFamily = 'Inter';
-  // static final AppSharedPrefKey sharedPrefKey = AppSharedPrefKey();
-  // static final HttpClient httpClient = AppHttpClient.create();
-  // static final HeaderProvider headerProvider = AppHeaderProvider.create();
+  static const String fontFamily = 'Poppins';
   static final String baseURL = env.baseURL;
   static final bool isDevelopment = env.isDevelopMode;
 }

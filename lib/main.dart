@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pos_app/feature/splash/view/splash_page.dart';
 
 import 'core/injection/env.dart';
 import 'core/theme/app_theme.dart';
@@ -27,12 +28,12 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       showSemanticsDebugger: false,
-      title: 'Flutter Demo',
+      title: 'Pos App',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       theme: AppTheme.lightTheme(context),
       darkTheme: AppTheme.darkTheme(context),
-      // home: SplashPage(),
+      home: SplashPage(),
     );
   }
 }
